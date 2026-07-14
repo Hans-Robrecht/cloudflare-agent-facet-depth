@@ -10,12 +10,41 @@ import {
   tool
 } from "ai";
 import { z } from "zod";
+class AIChatAgentWithLogging extends AIChatAgent<Env> {
+  onStart() {
+    console.log(`[${this.constructor.name}-${this.name}: onStart]`, {
+      parentPath: this.parentPath,
+      parentDepth: this.parentPath.length,
+      selfPath: this.selfPath,
+      selfDepth: this.selfPath.length,
+    });
+  }
 
-export class ChatAgent extends AIChatAgent<Env> {
+  async onBeforeSubAgent(
+    request: Request,
+    child: { className: string; name: string },
+  ) {
+    console.log(`[${this.constructor.name}-${this.name}: onBeforeSubAgent]`, {
+      parentPath: this.parentPath,
+      parentDepth: this.parentPath.length,
+      selfPath: this.selfPath,
+      selfDepth: this.selfPath.length,
+      requestChild: child,
+      url: request.url,
+    });
+  }
+}
+
+export class ChatAgentTwo extends AIChatAgentWithLogging {}
+
+export class ChatAgentOne extends AIChatAgentWithLogging {}
+
+export class ChatAgent extends AIChatAgentWithLogging {
   maxPersistedMessages = 100;
   chatRecovery = true;
 
   onStart() {
+    super.onStart();
     // Configure OAuth popup behavior for MCP servers that require authentication
     this.mcp.configureOAuthCallback({
       customHandler: (result) => {
